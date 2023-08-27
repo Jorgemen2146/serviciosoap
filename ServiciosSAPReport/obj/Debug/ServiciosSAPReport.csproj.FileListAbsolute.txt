@@ -1,0 +1,7 @@
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\bin\ServiciosSAPReport.dll.config
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\bin\ServiciosSAPReport.dll
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\bin\ServiciosSAPReport.pdb
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\obj\Debug\ServiciosSAPReport.csproj.AssemblyReference.cache
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\obj\Debug\ServiciosSAPReport.csproj.CoreCompileInputs.cache
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\obj\Debug\ServiciosSAPReport.dll
+D:\proyectos vs\ServiciosSAPReport\ServiciosSAPReport\obj\Debug\ServiciosSAPReport.pdb
