@@ -3,6 +3,19 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Security: API Keys and Sensitive Data
+# Never commit files with API keys or credentials
+*apikey*
+*api-key*
+*api_key*
+*.key
+.env
+.env.*
+secrets.json
+appsettings.Development.json
+Web.config
+# Note: Web.config.example is OK to commit as it has placeholder values
+
 # User-specific files
 *.rsuser
 *.suo
