@@ -1,0 +1,233 @@
+using System;
+using System.Configuration;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace ServiciosSAPReport.Helper
+{
+    /// <summary>
+    /// Helper class for integrating with Claude Sonnet API
+    /// Clase auxiliar para integración con la API de Claude Sonnet
+    /// 
+    /// NOTA / NOTE: Este es un ejemplo opcional. Para usarlo necesitas:
+    /// This is an optional example. To use it you need:
+    /// 1. Agregar referencia a Newtonsoft.Json (JSON.NET) via NuGet
+    ///    Add reference to Newtonsoft.Json (JSON.NET) via NuGet
+    /// 2. Configurar tu API key en Web.config
+    ///    Configure your API key in Web.config
+    /// 3. Descomentar este código si deseas usarlo
+    ///    Uncomment this code if you want to use it
+    /// </summary>
+    public class ClaudeHelper
+    {
+        private static readonly string ApiKey = ConfigurationManager.AppSettings["Anthropic.ApiKey"];
+        private static readonly string Model = ConfigurationManager.AppSettings["Anthropic.Model"] ?? "claude-3-5-sonnet-20241022";
+        private static readonly string ApiVersion = ConfigurationManager.AppSettings["Anthropic.ApiVersion"] ?? "2023-06-01";
+        private static readonly int MaxTokens = int.Parse(ConfigurationManager.AppSettings["Anthropic.MaxTokens"] ?? "4096");
+        private static readonly double Temperature = double.Parse(ConfigurationManager.AppSettings["Anthropic.Temperature"] ?? "0.7");
+        private static readonly string ApiUrl = "https://api.anthropic.com/v1/messages";
+
+        /// <summary>
+        /// Send a prompt to Claude and get a completion
+        /// Envía un prompt a Claude y obtiene una respuesta
+        /// </summary>
+        /// <param name="prompt">The prompt to send / El prompt a enviar</param>
+        /// <returns>Claude's response / La respuesta de Claude</returns>
+        public static async Task<string> GetCompletion(string prompt)
+        {
+            if (string.IsNullOrEmpty(ApiKey) || ApiKey == "tu-api-key-aqui")
+            {
+                throw new InvalidOperationException(
+                    "API key not configured. Please set Anthropic.ApiKey in Web.config. " +
+                    "API key no configurada. Por favor configura Anthropic.ApiKey en Web.config."
+                );
+            }
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    // Set required headers / Establecer headers requeridos
+                    client.DefaultRequestHeaders.Add("x-api-key", ApiKey);
+                    client.DefaultRequestHeaders.Add("anthropic-version", ApiVersion);
+
+                    // Build request payload / Construir payload de solicitud
+                    var requestBody = new
+                    {
+                        model = Model,
+                        max_tokens = MaxTokens,
+                        temperature = Temperature,
+                        messages = new[]
+                        {
+                            new
+                            {
+                                role = "user",
+                                content = prompt
+                            }
+                        }
+                    };
+
+                    var jsonContent = JsonConvert.SerializeObject(requestBody);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    // Send request / Enviar solicitud
+                    var response = await client.PostAsync(ApiUrl, content);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new HttpRequestException(
+                            $"API request failed with status {response.StatusCode}: {responseContent}"
+                        );
+                    }
+
+                    // Parse response / Parsear respuesta
+                    var jsonResponse = JObject.Parse(responseContent);
+                    var textContent = jsonResponse["content"]?[0]?["text"]?.ToString();
+
+                    return textContent ?? string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error calling Claude API: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generate code documentation using Claude
+        /// Generar documentación de código usando Claude
+        /// </summary>
+        /// <param name="code">Code to document / Código a documentar</param>
+        /// <returns>Documentation / Documentación</returns>
+        public static async Task<string> GenerateDocumentation(string code)
+        {
+            var prompt = $@"Generate XML documentation comments for the following C# code. 
+Include summary, param, and returns tags as appropriate.
+
+Code:
+{code}
+
+Provide only the XML documentation comments, no additional explanation.";
+
+            return await GetCompletion(prompt);
+        }
+
+        /// <summary>
+        /// Analyze code for potential improvements
+        /// Analizar código para posibles mejoras
+        /// </summary>
+        /// <param name="code">Code to analyze / Código a analizar</param>
+        /// <returns>Analysis and suggestions / Análisis y sugerencias</returns>
+        public static async Task<string> AnalyzeCode(string code)
+        {
+            var prompt = $@"Analyze the following C# code and provide:
+1. Potential bugs or issues
+2. Performance improvements
+3. Best practice recommendations
+4. Security concerns
+
+Code:
+{code}
+
+Provide a detailed but concise analysis.";
+
+            return await GetCompletion(prompt);
+        }
+
+        /// <summary>
+        /// Generate unit tests for code
+        /// Generar tests unitarios para código
+        /// </summary>
+        /// <param name="code">Code to test / Código a testear</param>
+        /// <param name="testFramework">Test framework (NUnit, MSTest, xUnit) / Framework de tests</param>
+        /// <returns>Unit test code / Código de tests unitarios</returns>
+        public static async Task<string> GenerateUnitTests(string code, string testFramework = "NUnit")
+        {
+            var prompt = $@"Generate comprehensive unit tests for the following C# code using {testFramework}.
+Include:
+- Happy path tests
+- Edge cases
+- Null/empty input handling
+- Exception cases
+
+Code:
+{code}
+
+Provide complete, runnable test code.";
+
+            return await GetCompletion(prompt);
+        }
+
+        /// <summary>
+        /// Refactor code with specific instructions
+        /// Refactorizar código con instrucciones específicas
+        /// </summary>
+        /// <param name="code">Code to refactor / Código a refactorizar</param>
+        /// <param name="instructions">Refactoring instructions / Instrucciones de refactorización</param>
+        /// <returns>Refactored code / Código refactorizado</returns>
+        public static async Task<string> RefactorCode(string code, string instructions)
+        {
+            var prompt = $@"Refactor the following C# code according to these instructions:
+{instructions}
+
+Original code:
+{code}
+
+Provide only the refactored code, maintaining the same functionality.";
+
+            return await GetCompletion(prompt);
+        }
+
+        /// <summary>
+        /// Explain complex code in simple terms
+        /// Explicar código complejo en términos simples
+        /// </summary>
+        /// <param name="code">Code to explain / Código a explicar</param>
+        /// <returns>Explanation / Explicación</returns>
+        public static async Task<string> ExplainCode(string code)
+        {
+            var prompt = $@"Explain the following C# code in simple terms.
+Include:
+- What it does
+- How it works
+- Key concepts used
+- Potential use cases
+
+Code:
+{code}
+
+Provide a clear, beginner-friendly explanation.";
+
+            return await GetCompletion(prompt);
+        }
+
+        /// <summary>
+        /// Check if Claude API is configured and accessible
+        /// Verificar si la API de Claude está configurada y accesible
+        /// </summary>
+        /// <returns>True if configured / True si está configurada</returns>
+        public static bool IsConfigured()
+        {
+            return !string.IsNullOrEmpty(ApiKey) && ApiKey != "tu-api-key-aqui";
+        }
+
+        /// <summary>
+        /// Get current configuration info
+        /// Obtener información de configuración actual
+        /// </summary>
+        /// <returns>Configuration info / Información de configuración</returns>
+        public static string GetConfigInfo()
+        {
+            return $@"Claude API Configuration:
+- Model: {Model}
+- Max Tokens: {MaxTokens}
+- Temperature: {Temperature}
+- API Version: {ApiVersion}
+- Configured: {IsConfigured()}";
+        }
+    }
+}

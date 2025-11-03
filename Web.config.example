@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Archivo de ejemplo para configuración con Claude Sonnet API
+  Example configuration file for Claude Sonnet API
+  
+  Para usar la API de Claude directamente en tu proyecto:
+  To use Claude API directly in your project:
+  
+  1. Copia este archivo como Web.config (si es un nuevo proyecto)
+     Copy this file as Web.config (if it's a new project)
+  
+  2. O agrega las secciones de appSettings a tu Web.config existente
+     Or add the appSettings sections to your existing Web.config
+  
+  3. Obtén tu API key de: https://console.anthropic.com/
+     Get your API key from: https://console.anthropic.com/
+  
+  4. Reemplaza "tu-api-key-aqui" con tu clave real
+     Replace "your-api-key-here" with your actual key
+-->
+<configuration>
+  <connectionStrings>
+    <!-- Tu cadena de conexión existente / Your existing connection string -->
+    <add name="SqlCnn" providerName="System.Data.SqlClient" connectionString="Server=YOUR_SERVER;Database=YOUR_DB;user=YOUR_USER;password=YOUR_PASSWORD;" />
+  </connectionStrings>
+  
+  <appSettings>
+    <add key="aspnet:UseTaskFriendlySynchronizationContext" value="true" />
+    
+    <!-- Configuración de Claude Sonnet API / Claude Sonnet API Configuration -->
+    <!-- 
+      Para integración directa con Claude:
+      For direct Claude integration:
+      - Obtén tu API key en: https://console.anthropic.com/
+      - Get your API key at: https://console.anthropic.com/
+    -->
+    <add key="Anthropic.ApiKey" value="tu-api-key-aqui" />
+    <add key="Anthropic.Model" value="claude-3-5-sonnet-20241022" />
+    <add key="Anthropic.MaxTokens" value="4096" />
+    <add key="Anthropic.Temperature" value="0.7" />
+    <add key="Anthropic.ApiVersion" value="2023-06-01" />
+    
+    <!-- 
+      Opciones de configuración adicionales:
+      Additional configuration options:
+      
+      - Anthropic.ApiKey: Tu API key de Anthropic / Your Anthropic API key
+      - Anthropic.Model: Modelo a usar (claude-3-5-sonnet-20241022 recomendado) / Model to use (claude-3-5-sonnet-20241022 recommended)
+      - Anthropic.MaxTokens: Número máximo de tokens en la respuesta / Maximum tokens in response
+      - Anthropic.Temperature: Creatividad (0.0-1.0, 0.7 recomendado) / Creativity (0.0-1.0, 0.7 recommended)
+      - Anthropic.ApiVersion: Versión de la API / API version
+    -->
+    
+    <!-- Configuración opcional para GitHub Copilot / Optional GitHub Copilot configuration -->
+    <!--
+    <add key="GitHubCopilot.Enabled" value="true" />
+    <add key="GitHubCopilot.SuggestionsEnabled" value="true" />
+    -->
+  </appSettings>
+  
+  <system.web>
+    <compilation debug="true" targetFramework="4.7.2" />
+    <httpRuntime targetFramework="4.7.2"/>
+  </system.web>
+  
+  <system.serviceModel>
+    <behaviors>
+      <serviceBehaviors>
+        <behavior>
+          <!-- Para evitar revelar información de los metadatos, establezca los valores siguientes en false antes de la implementación -->
+          <serviceMetadata httpGetEnabled="true" httpsGetEnabled="true"/>
+          <!-- Para recibir detalles de las excepciones en los errores para la depuración, establezca el siguiente valor en true. Para no revelar información sobre las excepciones establézcalo en false antes de la implementación -->
+          <serviceDebug includeExceptionDetailInFaults="false"/>
+        </behavior>
+      </serviceBehaviors>
+    </behaviors>
+    <protocolMapping>
+        <add binding="basicHttpsBinding" scheme="https" />
+    </protocolMapping>    
+    <serviceHostingEnvironment aspNetCompatibilityEnabled="true" multipleSiteBindingsEnabled="true" />
+  </system.serviceModel>
+  
+  <system.webServer>
+    <modules runAllManagedModulesForAllRequests="true"/>
+    <!--
+        Para examinar el directorio raíz de la aplicación web durante la depuración, establezca el valor siguiente en true.
+        Establézcalo en false antes de la implementación para evitar revelar información sobre la carpeta de aplicación web.
+      -->
+    <directoryBrowse enabled="true"/>
+  </system.webServer>
+
+</configuration>
